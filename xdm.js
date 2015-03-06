@@ -133,10 +133,6 @@
         if (!url) {
             throw new Error('url is undefined or empty');
         }
-        if (/^file/.test(url)) {
-            throw new Error('The file:// protocol is not supported');
-        }
-
         var m = url.toLowerCase().match(reURI);
         if (m) {
             var proto = m[2], domain = m[3], port = m[4] || '';
@@ -501,10 +497,14 @@
          * @param {Object} event The message event
          */
 
+        function checkOrigin(origin, target) {
+          return (origin === targetOrigin) || /^file/.test(targetOrigin);
+        }
+
         function _windowOnMessage(event) {
             var origin = getLocation(event.origin);
             var dataIsString = (typeof event.data === 'string');
-            if (origin === targetOrigin && dataIsString && event.data.substring(0, config.channel.length + 1) === config.channel + ' ') {
+            if (checkOrigin(origin, targetOrigin) && dataIsString && event.data.substring(0, config.channel.length + 1) === config.channel + ' ') {
                 pub.up.incoming(event.data.substring(config.channel.length + 1), origin);
             }
         }
